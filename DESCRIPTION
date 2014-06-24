@@ -15,8 +15,3 @@ Description: This R project/package provides functions that wrap the
 License: GPL
 LazyLoad: yes
 URL: http://jbryer.github.com/qualtrics
-Collate:
-    'panels.R'
-    'surveys.R'
-    'VariableUI.r'
-    'parseXMLResponse.r'

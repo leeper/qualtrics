@@ -1,78 +1,87 @@
 #' Returns the results of a given survey.
 #'
-#' @param username the Qualtrics username.
-#' @param password the Qualtrics password.
+#' @param reqAuth list object returned from \code{\link{auth}}
 #' @param surveyid the Qualtrics survey id.
-#' @param truncNames the maximum length of column names returned from qualtrics.
-#' @param startDate beginning date range for results returned.
-#' @param endDate ending date range for results returned.
 #' @export
-getSurveyResults <- function(username, password, surveyid, 
-							 truncNames=20, startDate=NULL, endDate=NULL) {
-	url = paste("http://eu.qualtrics.com/Server/RestApi.php?Request=getResponseData&User=",
-		username, "&Password=", password, "&SurveyID=", surveyid, "&Format=CSV", 
-		ifelse(is.null(startDate), "", paste("&StartDate=", startDate, sep="")), 
-		ifelse(is.null(endDate), "", paste("&EndDate=", endDate, sep="")),
-		sep="")
-	t = read.csv(url, skip=1)
-	t$X = NULL
-	n = strsplit(names(t), "....", fixed=TRUE)
-	for(i in 1:ncol(t)) {
-		names(t)[i] = n[[i]][length(n[[i]])]
-		if(nchar(names(t)[i]) > truncNames) {
-			names(t)[i] = substr(names(t)[i], 1, truncNames)
-		}
-	}
-	t
+getSurveyResults <- function(reqAuth, surveyid) {
+  # import
+    url <- paste0(reqAuth[[1]], "?", 
+                  "API_SELECT=ControlPanel",
+                  "&Version=2.3",
+                  "&Request=getLegacyResponseData",
+                  "&User=", reqAuth[[2]],
+                  ifelse(reqAuth[[3]]=="", "&Token=",
+                         paste0("%23", reqAuth[[3]], "&Token=")),
+                  reqAuth[[4]],
+                  "&Format=CSV",
+                  "&SurveyID=", surveyid)
+    x <- getURL(url)
+    df <- read.csv(text=x, stringsAsFactors=FALSE)
+  # get question id
+    url2 <- paste0(reqAuth[[1]], "?", 
+                  "API_SELECT=ControlPanel",
+                  "&Version=2.3",
+                  "&Request=getSurvey",
+                  "&User=", reqAuth[[2]],
+                  ifelse(reqAuth[[3]]=="", "&Token=",
+                         paste0("%23", reqAuth[[3]], "&Token=")),
+                  reqAuth[[4]],
+                  "&Format=XML",
+                  "&SurveyID=", surveyid)
+    temp <- getURL(url2)
+    doc <- xmlRoot(xmlTreeParse(temp))
+    q <- parseXMLResponse(doc[["Questions"]])
+    itemnames <- q$QuestionText
+    itemid <- q$ExportTag
+  # replace item names with id
+    for (i in 1:length(as.character(as.vector(df[1,])))) {
+      for (f in 1:length(itemnames)) {
+        df[1,i] <- ifelse(df[1,i]==itemnames[f], itemid[f], df[1,i])
+      }
+    }
+  # set column names
+    colnames(df) <- as.character(as.vector(df[1,]))
+    df <- df[-1,]
+    return(df)
 }
 
 #' Returns a list of surveys available for the given user.
 #'
-#' @param username the Qualtrics username.
-#' @param password the Qualtrics password.
+#' @param reqAuth list object returned from \code{\link{auth}}
 #' @export
-getSurveys <- function(username, password) {
-	url <- paste("http://eu.qualtrics.com/Server/RestApi.php?Request=getSurveys&User=",
-		username, "&Password=", password, sep="")
-	doc <- xmlRoot(xmlTreeParse(url))
-	df <- parseXMLResponse(doc[['Surveys']])
-	return(df)
+getSurveys <- function(reqAuth) {
+  url <- paste0(reqAuth[[1]], "?", 
+                "API_SELECT=ControlPanel",
+                "&Version=2.3",
+                "&Request=getSurveys",
+                "&User=", reqAuth[[2]],
+                ifelse(reqAuth[[3]]=="", "&Token=",
+                       paste0("%23", reqAuth[[3]], "&Token=")),
+                reqAuth[[4]],
+                "&Format=XML")
+  temp <- getURL(url)
+  doc <- xmlRoot(xmlTreeParse(temp))
+  df2 <- parseXMLResponse(doc[["Questions"]][[1]])
+  return(df)
 }
+
 
 #' Returns the given survey.
 #'
-#' @param username the Qualtrics username.
-#' @param password the Qualtrics password.
+#' @param reqAuth list object returned from \code{\link{auth}}
 #' @param surveyid the Qualtrics survey id.
 #' @export
-getSurvey <- function(username, password, surveyid) {
-	url = paste("http://eu.qualtrics.com/Server/RestApi.php?Request=getSurvey&User=",
-		username, "&Password=", password, "&SurveyID=", surveyid, sep="")
-	xmlRoot(xmlTreeParse(url))
+getSurvey <- function(reqAuth, surveyid) {
+  url <- paste0(reqAuth[[1]], "?", 
+                "API_SELECT=ControlPanel",
+                "&Version=2.3",
+                "&Request=getSurvey",
+                "&User=", reqAuth[[2]],
+                ifelse(reqAuth[[3]]=="", "&Token=",
+                       paste0("%23", reqAuth[[3]], "&Token=")),
+                reqAuth[[4]],
+                "&Format=XML",
+                "&SurveyID=", surveyid)
+  temp <- getURL(url)
+  xmlRoot(xmlTreeParse(temp))
 }
-
-#' Returns the given survey name.
-#'
-#' @param username the Qualtrics username.
-#' @param password the Qualtrics password.
-#' @param surveyid the Qualtrics survey id.
-#' @export
-getSurveyName <- function(username, password, surveyid) {
-	url = paste("http://eu.qualtrics.com/Server/RestApi.php?Request=getSurveyName&User=",
-		username, "&Password=", password, "&SurveyID=", surveyid, sep="")
-	doc = xmlRoot(xmlTreeParsedoc(url))
-	fields = names(doc)
-	ans = as.data.frame(replicate(length(unique(unlist(fields))), character()), 
-						stringsAsFactors=FALSE)
-	names(ans) = unlist(names(fields))
-	sapply(1:xmlSize(doc), 
-		function(i) { 
-			c = doc[[i]] #$element
-			if(length(xmlValue(c)) > 0) {
-				ans[1, i] <<- xmlValue(c)
-			}
-		})
-	ans
-}
-
-
