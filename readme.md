@@ -39,7 +39,8 @@ Basically:
 
 Future
 ------
-Send to Qualtrics via API
+Send new survey to Qualtrics via API
+Update panels functions
 
 
 
