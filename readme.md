@@ -5,7 +5,7 @@ The `qualtrics` R package provides functions to interact with the [Qualtrics](ht
 	> require(devtools)
 	> install_github('qualtrics', 'ericpgreen')
 	
-I forked the core functions to access the Qualtrics from [Jason Bryer's `qualtrics` repo](https://github.com/jbryer/qualtrics) to use Version 2.3 of the Qualtrics API.
+I forked [Jason Bryer's `qualtrics` repo](https://github.com/jbryer/qualtrics) and modified the core functions to use Version 2.3 of the Qualtrics API.
 
 API Credentials
 ----------------
