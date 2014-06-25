@@ -13,7 +13,7 @@ The first step is to run the `auth()` function which takes the arguments `userem
 
 Downloading Survey Data
 ------------------------
-After you create an `auth` object, pass it to `getSurveyResults()` along with your `surveyid`. You can get a list of survey IDs on your account page of Qualtrics.
+After you create an `auth` object, pass it to `getSurveyResults()` along with your `surveyid`. You can get a list of survey IDs on your Qualtrics account page. Or just run `getSurveys()` with your `auth` object.
 
 Create and Import Surveys
 -------------------------
@@ -39,8 +39,9 @@ Basically:
 
 Future
 ------
-Send new survey to Qualtrics via API
-Update panels functions
+
+1. Send new survey to Qualtrics via API
+2. Update panels functions
 
 
 
