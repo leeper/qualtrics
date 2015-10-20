@@ -3,7 +3,9 @@ Type: Package
 Title: Qualtrics Survey Data Access
 Version: 0.9.1-dev
 Date: 2015-10-20
-Author: Jason Bryer <jbryer@excelsior.edu>
+Authors@R: c(person("Thomas J.", "Leeper", role = c("aut"), email = "thosjleeper@gmail.com"),
+             person("Eric P.", "Green", role = "aut", email = "mail@ericpgreen.com"),
+             person("Jason", "Bryer", role = c("aut", "cre"), email = "jbryer@excelsior.edu"))
 Maintainer: Jason Bryer <jbryer@excelsior.edu>
 Depends:
     utils,
