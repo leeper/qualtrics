@@ -12,8 +12,3 @@ Description: Functions that wrap the Qualtrics.com web survey tool. API access i
 License: GPL
 LazyLoad: yes
 URL: http://jbryer.github.com/qualtrics
-Collate:
-    'panels.R'
-    'surveys.R'
-    'VariableUI.r'
-    'parseXMLResponse.r'
